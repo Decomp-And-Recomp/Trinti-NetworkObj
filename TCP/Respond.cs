@@ -163,7 +163,7 @@ class Responder
 
         foreach (var item in rooms)
         {
-            if (item.Value.Online < 4 && !item.Value.Started)
+            if (item.Value.MapId == map && item.Value.Online < 4 && !item.Value.Started)
             {
                 chosenRoom = item.Value;
                 RoomId = item.Key;
