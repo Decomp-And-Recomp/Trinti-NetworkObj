@@ -36,12 +36,9 @@ namespace NetworkObj.TCP
 
             rooms.Add(roomId, room);
 
-            string logHelp = (Password != String.Empty) ? $"password {Password}" : "no password";
+            string logHelp = (Password != String.Empty) ? $"Password: {Password}" : "";
 
-            IPEndPoint? real = await Proxy.TryReadProxyHeaderAsync(client.GetStream());
-            IPEndPoint displayed = real ?? (IPEndPoint)client.Client.RemoteEndPoint!;
-
-            Logger.Log($"IP {displayed.Address} created Room {roomId} was created with {logHelp}");
+            Logger.Log($"User {user.Name} ({user.IP}) created Room {roomId} {logHelp}");
 
             return roomId;
         }

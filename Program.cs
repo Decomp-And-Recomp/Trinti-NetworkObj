@@ -8,7 +8,9 @@ namespace NetworkObj
     class Program
     {
         public static List<string> BannedIPs = new List<string>();
+        public static List<string> Logs = new List<string>();
         static string banFile = "banlist.txt";
+        static string logFile = "log.txt";
         private static int CurrentArg = 0;
         private static int Indexed = 0;
         private static bool indexedServer = false;
@@ -19,6 +21,7 @@ namespace NetworkObj
         static async Task Main(string[] args)
         {
             LoadBanList();
+            LoadLog();
 
             foreach (string arg in args)
             {
@@ -88,6 +91,19 @@ namespace NetworkObj
         static void SaveBanList()
         {
             File.WriteAllLines(banFile, BannedIPs);
+        }
+
+        static void LoadLog()
+        {
+            if (File.Exists(logFile))
+            {
+                Logs = new List<string>(File.ReadAllLines(logFile));
+            }
+        }
+
+        public static void SaveLog()
+        {
+            File.WriteAllLines(logFile, Logs);
         }
 
         static void CommandLine()

@@ -16,6 +16,9 @@ public static class Logger
 
     public static void Log(LogLevel level, object? message)
     {
+        Program.Logs.Add(message.ToString());
+        Program.SaveLog();
+
         lock (logLock)
         {
             switch (level)

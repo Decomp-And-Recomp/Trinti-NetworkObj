@@ -405,10 +405,7 @@ class Responder
         await Clients.SendToClient(client, p.Pack());
         await Rooms.SendToRoom((int)roomId, notify.Pack(), client);
 
-        IPEndPoint? real = await Proxy.TryReadProxyHeaderAsync(client.GetStream());
-        IPEndPoint displayed = real ?? (IPEndPoint)client.Client.RemoteEndPoint!;
-
-        Logger.Log($"User {user.UserId} ({displayed.Address}) join Room {roomId}");
+        Logger.Log($"User {user.Name} ({user.IP}) join Room {roomId}");
     }
 
     async Task PlayerSpawn()

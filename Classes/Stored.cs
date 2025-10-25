@@ -13,6 +13,7 @@ namespace NetworkObj
         public int Level = 1;
         public string Name = "Player";
         public int Index = 0;
+        public string IP = "";
         // private int Kills; (survival)
     }
 

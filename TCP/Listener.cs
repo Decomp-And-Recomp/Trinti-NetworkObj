@@ -8,7 +8,7 @@ namespace NetworkObj.TCP
     class Listener
     {
         public static List<(TcpClient client, string IP)> IPData = new List<(TcpClient client, string IP)>();
-
+        
         public static void DisconnectClient(string IP)
         {
             lock (IPData)
@@ -23,6 +23,22 @@ namespace NetworkObj.TCP
                     }
                 }
             }
+        }
+
+        public static string GetIP(TcpClient client)
+        {
+            lock (IPData)
+            {
+                for (int i = IPData.Count - 1; i >= 0; i--)
+                {
+                    if (IPData[i].client == client)
+                    {
+                        return IPData[i].IP;
+                    }
+                }
+            }
+
+            return "";
         }
 
         public async Task Start(IPAddress IP, int Port)
@@ -52,6 +68,8 @@ namespace NetworkObj.TCP
 
                         Logger.Info($"Client {displayed.Address} connected");
                         IPData.Add((client, displayed.Address.ToString()));
+
+                        Clients.GetUser(client).IP = displayed.Address.ToString();
 
                         await new Responder().Respond(client);
                     }
