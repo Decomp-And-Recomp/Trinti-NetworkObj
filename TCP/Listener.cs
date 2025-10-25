@@ -66,6 +66,8 @@ namespace NetworkObj.TCP
                             return;
                         }
 
+                        Clients.AddClient(client);
+
                         Logger.Info($"Client {displayed.Address} connected");
                         IPData.Add((client, displayed.Address.ToString()));
 

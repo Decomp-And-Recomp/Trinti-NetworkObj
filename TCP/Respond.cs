@@ -17,9 +17,6 @@ class Responder
 
     public async Task Respond(TcpClient cli)
     {
-        client = cli;
-        Clients.AddClient(client);
-
         NetworkStream stream = client.GetStream();
         byte[] lengthBuffer = new byte[4];
 
