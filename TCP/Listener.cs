@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using NetworkObj.Utils;
 
 namespace NetworkObj.TCP
@@ -16,18 +17,23 @@ namespace NetworkObj.TCP
             while (true)
             {
                 TcpClient client = await listener.AcceptTcpClientAsync();
-
-                Logger.Info($"Client {client.Client.RemoteEndPoint} connected");
-
                 _ = Task.Run(async () =>
                 {
                     try
                     {
+                        NetworkStream stream = client.GetStream();
+
+                        IPEndPoint? real = await Proxy.TryReadProxyHeaderAsync(stream);
+
+                        IPEndPoint displayed = real ?? (IPEndPoint)client.Client.RemoteEndPoint!;
+
+                        Logger.Info($"Client {displayed.Address}:{displayed.Port} connected");
+
                         await new Responder().Respond(client);
                     }
-                    catch (Exception ex)
+                    catch (System.Exception ex)
                     {
-                        Logger.Error($"Error with client {client.Client.RemoteEndPoint}: {ex.Message}");
+                        Logger.Error($"Error with client: {ex.Message}");
                     }
                 });
             }
