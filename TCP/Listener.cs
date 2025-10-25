@@ -8,6 +8,7 @@ namespace NetworkObj.TCP
     class Listener
     {
         public static List<(TcpClient client, string IP)> IPData = new List<(TcpClient client, string IP)>();
+        private static VPN.IPHubClient VPN = new VPN.IPHubClient("MzAxMjU6OHA5T1MyWlNQcGxSc05MSmZEVk1jQXBDRlVXMHVZNEQ=");
         
         public static void DisconnectClient(string IP)
         {
@@ -61,6 +62,13 @@ namespace NetworkObj.TCP
                         IPEndPoint displayed = real ?? (IPEndPoint)client.Client.RemoteEndPoint!;
 
                         if (Program.BannedIPs.Contains(displayed.Address.ToString()))
+                        {
+                            client.Close();
+                            return;
+                        }
+
+                        bool isVPN = await VPN.IsVpnIpAsync(displayed.Address.ToString());
+                        if (isVPN)
                         {
                             client.Close();
                             return;
