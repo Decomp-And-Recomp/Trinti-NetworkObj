@@ -7,6 +7,8 @@ namespace NetworkObj
 {
     class Program
     {
+        public static List<string> BannedIPs = new List<string>();
+        static string banFile = "banlist.txt";
         private static int CurrentArg = 0;
         private static int Indexed = 0;
         private static bool indexedServer = false;
@@ -16,6 +18,8 @@ namespace NetworkObj
 
         static async Task Main(string[] args)
         {
+            LoadBanList();
+
             foreach (string arg in args)
             {
                 if ((arg == "-s" || arg == "--server") && !indexedServer)
@@ -64,12 +68,68 @@ namespace NetworkObj
                 CurrentArg++;
             }
 
+            Thread commandThread = new Thread(CommandLine);
+            commandThread.Start();
+
             Listener Server = new Listener();
             IPAddress IP = IPAddress.Any;
 
             await Server.Start(IP, port);
+        }
 
-            Console.ReadLine();
+        static void LoadBanList()
+        {
+            if (File.Exists(banFile))
+            {
+                BannedIPs = new List<string>(File.ReadAllLines(banFile));
+            }
+        }
+
+        static void SaveBanList()
+        {
+            File.WriteAllLines(banFile, BannedIPs);
+        }
+
+        static void CommandLine()
+        {
+            while (true)
+            {
+                string input = Console.ReadLine();
+                string[] parts = input.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+
+                if (parts.Length < 2) continue;
+
+                string command = parts[0].ToLower();
+                string ip = parts[1];
+
+                if (command == "ban")
+                {
+                    if (!BannedIPs.Contains(ip))
+                    {
+                        BannedIPs.Add(ip);
+                        SaveBanList();
+                        Logger.Info($"Banned IP: {ip}");
+                        Listener.DisconnectClient(ip);
+                    }
+                    else
+                    {
+                        Logger.Info($"IP {ip} is already banned.");
+                    }
+                }
+                else if (command == "unban")
+                {
+                    if (BannedIPs.Contains(ip))
+                    {
+                        BannedIPs.Remove(ip);
+                        SaveBanList();
+                        Logger.Info($"Unbanned IP: {ip}");
+                    }
+                    else
+                    {
+                        Logger.Info($"IP {ip} is not banned.");
+                    }
+                }
+            }
         }
     }
 }

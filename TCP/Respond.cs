@@ -2,6 +2,8 @@ using NetworkObj.Packets;
 using NetworkObj.Utils;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
+using System.Net;
 using System.Net.Sockets;
 using System.Reflection.Metadata;
 using static NetworkObj.Packets.GQuickMatch;
@@ -221,7 +223,7 @@ class Responder
         host.Avatar = (int)avatar;
         host.Level = (int)days;
 
-        int RoomId = Rooms.CreateRoom(client, password);
+        int RoomId = Rooms.CreateRoom(client, password).Result;
         Room? room = Rooms.GetRoom(RoomId);
         if (room == null) return;
         if ((int)mapId >= 1000)
@@ -403,7 +405,10 @@ class Responder
         await Clients.SendToClient(client, p.Pack());
         await Rooms.SendToRoom((int)roomId, notify.Pack(), client);
 
-        Logger.Log($"User {user.UserId} join Room {roomId}");
+        IPEndPoint? real = await Proxy.TryReadProxyHeaderAsync(client.GetStream());
+        IPEndPoint displayed = real ?? (IPEndPoint)client.Client.RemoteEndPoint!;
+
+        Logger.Log($"User {user.UserId} ({displayed.Address}) join Room {roomId}");
     }
 
     async Task PlayerSpawn()

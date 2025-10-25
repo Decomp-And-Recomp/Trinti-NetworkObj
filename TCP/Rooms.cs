@@ -1,5 +1,6 @@
-using System.Net.Sockets;
 using NetworkObj.Utils;
+using System.Net;
+using System.Net.Sockets;
 
 namespace NetworkObj.TCP
 {
@@ -7,7 +8,7 @@ namespace NetworkObj.TCP
     {
         private static readonly Dictionary<int, Room> rooms = new Dictionary<int, Room>();
 
-        public static int CreateRoom(TcpClient client, string Password)
+        public static async Task<int> CreateRoom(TcpClient client, string Password)
         {
             User? user = Clients.GetUser(client);
 
@@ -36,7 +37,11 @@ namespace NetworkObj.TCP
             rooms.Add(roomId, room);
 
             string logHelp = (Password != String.Empty) ? $"password {Password}" : "no password";
-            Logger.Log($"Room {roomId} was created with {logHelp}");
+
+            IPEndPoint? real = await Proxy.TryReadProxyHeaderAsync(client.GetStream());
+            IPEndPoint displayed = real ?? (IPEndPoint)client.Client.RemoteEndPoint!;
+
+            Logger.Log($"IP {displayed.Address} created Room {roomId} was created with {logHelp}");
 
             return roomId;
         }
