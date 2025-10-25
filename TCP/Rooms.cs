@@ -46,6 +46,11 @@ namespace NetworkObj.TCP
             rooms.Remove(roomId);
         }
 
+        public static Dictionary<int, Room> GetRooms()
+        {
+            return rooms;
+        }
+
         public static async Task LeaveRoom(int roomId, TcpClient client)
         {
             if (!rooms.TryGetValue(roomId, out Room? room)) return;

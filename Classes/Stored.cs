@@ -24,6 +24,8 @@ namespace NetworkObj
         public int Max = 4; // TODO: change to 3 if client is in survival (detect using 1u packet)
         public List<TcpClient> Players = new List<TcpClient>(4);
         public int Dead = 0;
+        public bool Started = false;
+        public bool Survival = false;
     }
 
     public struct Vector3

@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Sockets;
 using System.Reflection.Metadata;
+using static NetworkObj.Packets.GQuickMatch;
 
 namespace NetworkObj.TCP;
 
@@ -139,11 +140,58 @@ class Responder
                 case Protocols.CG_ITEM_PICK:
                     await PickItem();
                     break;
+                case Protocols.CG_QUICK_ROOM_LIST:
+                    await QuickMatch();
+                    break;
                 default:
                     Logger.Error($"{Enum.GetName(typeof(Protocols), (Protocols)packetType)} unimplemented");
                     break;
             }
         }
+    }
+
+    async Task QuickMatch()
+    {
+        uint page = rpacket.ruint();
+        uint map = rpacket.ruint();
+
+        Dictionary<int, Room> rooms = Rooms.GetRooms();
+        Room? chosenRoom = null;
+        int RoomId = 0;
+
+        foreach (var item in rooms)
+        {
+            if (item.Value.MapId == map && item.Value.Online < 4 && !item.Value.Started)
+            {
+                chosenRoom = item.Value;
+                RoomId = item.Key;
+                break;
+            }
+        }
+
+        if (chosenRoom == null) return;
+
+        User? host = Clients.GetUser(chosenRoom.Players[0]);
+        if (host == null) return;
+
+        GQuickMatch p = new GQuickMatch();
+        p.m_iCurpage = page;
+        p.m_pagesum = page;
+        p.m_values = 1u;
+
+        RoomInfo New = new RoomInfo();
+        New.m_iMapId = map;
+        New.m_iOnlineNum = (uint)chosenRoom.Online;
+        New.m_iMaxUserNum = 4u;
+        New.m_iRoomId = (uint)RoomId;
+        New.m_strCreaterNickname = host.Name;
+        New.m_Creater_level = (uint)host.Level;
+        New.m_password = chosenRoom.Password;
+        New.m_room_status = 0u;
+
+        p.room = New;
+
+        await Clients.SendToClient(client, p.Pack());
     }
 
     async Task Heartbeat()
@@ -176,6 +224,11 @@ class Responder
         int RoomId = Rooms.CreateRoom(client, password);
         Room? room = Rooms.GetRoom(RoomId);
         if (room == null) return;
+        if ((int)mapId >= 1000)
+        {
+            mapId /= 1000;
+            room.Survival = true;
+        }
         room.MapId = (int)mapId;
 
         host.RoomId = RoomId;
@@ -202,6 +255,10 @@ class Responder
         if (host.RoomId == -1 || !host.RoomMaster) return;
 
         Logger.Log($"Room {host.RoomId} started");
+
+        Room? hostRoom = Rooms.GetRoom(host.RoomId);
+        if (hostRoom == null) return;
+        hostRoom.Started = true;
 
         await Rooms.SendToRoom(host.RoomId, DefaultPacket(Protocols.GC_START_GAME_NOTIFY));
         await Rooms.SendToRoom(host.RoomId, DefaultPacket(Protocols.GC_START_GAME));
@@ -303,6 +360,7 @@ class Responder
         if (room.Online >= 4) return;
 
         if (room == null) return;
+        if (room.Started) return;
         p.m_map_id = (uint)room.MapId;
         p.m_lLocalTime = (long)localTime;
         p.m_lServerTime = (long)localTime;
@@ -681,11 +739,35 @@ class Responder
 
     async Task Win()
     {
-        uint winnerId = rpacket.ruint();
-        GStandard p = new GStandard();
-        p.m_iUserId = winnerId;
-        p.protocol = Protocols.GC_COOP_WINNER;
-        await Rooms.SendToRoom(GetRoomId(client), p.Pack(), client);
+        User? host = Clients.GetUser(client);
+        if (host == null) return;
+
+        Room? hostRoom = Rooms.GetRoom(host.RoomId);
+        if (hostRoom == null) return;
+
+        if (!hostRoom.Survival)
+        {
+            uint winnerId = rpacket.ruint();
+            GStandard p = new GStandard();
+            p.m_iUserId = winnerId;
+            p.protocol = Protocols.GC_COOP_WINNER;
+            await Rooms.SendToRoom(GetRoomId(client), p.Pack(), client);
+        }
+        else
+        {
+            uint userId = rpacket.ruint();
+            uint killCount = rpacket.ruint();
+            uint deathCount = rpacket.ruint();
+            uint cashLoot = rpacket.ruint();
+            ulong damageVal = rpacket.rulong();
+
+            GLeaderboard p = new GLeaderboard();
+            p.m_iUserId = userId;
+            p.mKill_count = killCount;
+            p.mDeath_count = deathCount;
+            p.mCash_loot = cashLoot;
+            p.mDamage_val = (long)damageVal;
+        }
     }
 
     async Task Kick()
