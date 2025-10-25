@@ -228,7 +228,7 @@ class Responder
         if (room == null) return;
         if ((int)mapId >= 1000)
         {
-            mapId /= 1000;
+            mapId -= 1000;
             room.Survival = true;
         }
         room.MapId = (int)mapId;
