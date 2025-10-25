@@ -772,6 +772,8 @@ class Responder
             p.mDeath_count = deathCount;
             p.mCash_loot = cashLoot;
             p.mDamage_val = (long)damageVal;
+
+            await Rooms.SendToRoom(GetRoomId(client), p.Pack(), client);
         }
     }
 
