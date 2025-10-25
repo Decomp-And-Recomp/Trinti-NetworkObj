@@ -15,8 +15,11 @@ class Responder
     private Reader rpacket = new Reader(new byte[0]);
     private TcpClient client = new TcpClient();
 
-    public async Task Respond(TcpClient cli)
+    public async Task Respond(TcpClient cli, string ip)
     {
+        client = cli;
+        Clients.AddClient(cli, ip);
+
         NetworkStream stream = client.GetStream();
         byte[] lengthBuffer = new byte[4];
 

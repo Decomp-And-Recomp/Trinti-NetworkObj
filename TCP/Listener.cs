@@ -66,14 +66,10 @@ namespace NetworkObj.TCP
                             return;
                         }
 
-                        Clients.AddClient(client);
-
                         Logger.Info($"Client {displayed.Address} connected");
                         IPData.Add((client, displayed.Address.ToString()));
 
-                        Clients.GetUser(client).IP = displayed.Address.ToString();
-
-                        await new Responder().Respond(client);
+                        await new Responder().Respond(client, displayed.Address.ToString());
                     }
                     catch (System.Exception ex)
                     {

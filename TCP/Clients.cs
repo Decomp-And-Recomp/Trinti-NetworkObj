@@ -9,12 +9,13 @@ namespace NetworkObj.TCP
     {
         private static readonly Dictionary<TcpClient, User> Users = new Dictionary<TcpClient, User>();
 
-        public static void AddClient(TcpClient client)
+        public static void AddClient(TcpClient client, string IP)
         {
             int userId = new Random().Next(1, int.MaxValue);
             User user = new User();
             user.UserId = userId;
-            Users.Add(client, user);
+            user.IP = IP;
+            Users.Add(client, user); 
         }
 
         public static User? GetUser(TcpClient client)
