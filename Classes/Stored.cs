@@ -60,4 +60,66 @@ namespace NetworkObj
             return $"{{{x}, {y}, {z}}}";
         }
     }
+
+    public enum Avatars : int
+    {
+        JoeBlo = 0,
+        Worker = 1,
+        Nerd = 2,
+        Doctor = 3,
+        Cowboy = 4,
+        Swat = 5,
+        Marine = 6,
+        BEAF = 7,
+        Pirate = 8,
+        Ninja = 9,
+        Pastor = 10,
+        Eskimo = 11,
+        Evil = 12,
+        Hunter = 13,
+        PixelJoeBlo = 14,
+        PixelMercenary = 15,
+        Charlemagne = 16,
+        Constantine = 17,
+        Mike = 18
+    }
+
+    public enum Weapons : int
+    {
+        Empty = 0,
+        AR = 1,
+        Shotgun = 2,
+        RocketLauncher = 3,
+        Gatling = 4,
+        Laser = 5,
+        Sniper = 6,
+        Chainsaw = 7,
+        M32 = 8,
+        Saber = 10,
+        Flamethrower = 11,
+        Electric = 12,
+        Crossbow = 14
+    }
+
+    public class Get
+    {
+        public string Avatar(int Character)
+        {
+            switch ((Avatars)Character)
+            {
+                case Avatars.JoeBlo:
+                    return "Human";
+                case Avatars.BEAF:
+                    return "B.E.A.F";
+                case Avatars.PixelJoeBlo:
+                    return "Pixel Human";
+                case Avatars.PixelMercenary:
+                    return "Pixel Mercenary";
+                default:
+                    return Enum.GetName<Avatars>((Avatars)Character);
+            }
+
+            return "Unidentified";
+        }
+    }
 }

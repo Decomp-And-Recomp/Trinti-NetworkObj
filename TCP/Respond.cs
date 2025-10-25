@@ -14,7 +14,7 @@ class Responder
 {
     private Reader rpacket = new Reader(new byte[0]);
     private TcpClient client = new TcpClient();
-
+    
     public async Task Respond(TcpClient cli, string ip)
     {
         client = cli;
@@ -163,7 +163,7 @@ class Responder
 
         foreach (var item in rooms)
         {
-            if (item.Value.MapId == map && item.Value.Online < 4 && !item.Value.Started)
+            if (item.Value.Online < 4 && !item.Value.Started)
             {
                 chosenRoom = item.Value;
                 RoomId = item.Key;
