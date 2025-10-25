@@ -338,6 +338,9 @@ class Responder
 
         User? user = Clients.GetUser(client);
         if (user == null) return;
+
+        if (user.RoomId != -1) return;
+
         Room? room = Rooms.GetRoom((int)roomId);
         if (room == null) return;
 
