@@ -18,6 +18,11 @@ namespace NetworkObj.TCP
             Users.Add(client, user); 
         }
 
+        public static void RemoveClient(TcpClient client)
+        {
+            Users.Remove(client);
+        }
+
         public static User? GetUser(TcpClient client)
         {
             if (Users.TryGetValue(client, out User? user))

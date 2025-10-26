@@ -409,6 +409,7 @@ class Responder
         await Rooms.SendToRoom((int)roomId, notify.Pack(), client);
 
         Logger.Log($"User {user.Name} ({user.IP}) join Room {roomId}");
+        await Bot.Bot.SendMessage($"```ansi\r\n\u001b[2;32m\u001b[2;37m\u001b[2;34mInfo\u001b[0m\u001b[2;37m\u001b[0m\u001b[2;32m\u001b[0m: User {user.Name} ({user.IP}) join Room {roomId}```");
     }
 
     async Task PlayerSpawn()

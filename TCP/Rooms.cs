@@ -39,6 +39,7 @@ namespace NetworkObj.TCP
             string logHelp = (Password != String.Empty) ? $"Password: {Password}" : "";
 
             Logger.Log($"User {user.Name} ({user.IP}) created Room {roomId} {logHelp}");
+            await Bot.Bot.SendMessage($"```ansi\r\n\u001b[2;32m\u001b[2;37m\u001b[2;34mInfo\u001b[0m\u001b[2;37m\u001b[0m\u001b[2;32m\u001b[0m: User {user.Name} ({user.IP}) created Room {roomId} {logHelp}```");
 
             return roomId;
         }

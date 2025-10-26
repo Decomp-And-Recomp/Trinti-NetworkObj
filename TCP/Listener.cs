@@ -19,6 +19,7 @@ namespace NetworkObj.TCP
                     if (IPData[i].IP == IP)
                     {
                         Logger.Info($"Disconnecting banned IP: {IP}");
+                        Clients.RemoveClient(IPData[i].client);
                         IPData[i].client.Close();
                         IPData.RemoveAt(i);
                     }
@@ -48,6 +49,7 @@ namespace NetworkObj.TCP
             listener.Start();
 
             Logger.Info($"Server started at {IP}:{Port}");
+            _ = Task.Run(CheckConnectionsLoop);
 
             while (true)
             {
@@ -84,6 +86,47 @@ namespace NetworkObj.TCP
                         Logger.Error($"Error with client: {ex.Message}");
                     }
                 });
+            }
+        }
+
+        private static async Task CheckConnectionsLoop()
+        {
+            while (true)
+            {
+                lock (IPData)
+                {
+                    for (int i = IPData.Count - 1; i >= 0; i--)
+                    {
+                        var (client, ip) = IPData[i];
+
+                        if (!IsClientConnected(client))
+                        {
+                            Logger.Info($"Client {ip} disconnected or unresponsive — removing");
+                            try { client.Close(); } catch { }
+                            IPData.RemoveAt(i);
+                            Clients.RemoveClient(client);
+                        }
+                    }
+                }
+
+                await Task.Delay(5000);
+            }
+        }
+
+        private static bool IsClientConnected(TcpClient client)
+        {
+            try
+            {
+                if (client == null || client.Client == null)
+                    return false;
+
+                bool part1 = client.Client.Poll(1, SelectMode.SelectRead);
+                bool part2 = (client.Client.Available == 0);
+                return !(part1 && part2);
+            }
+            catch
+            {
+                return false;
             }
         }
     }

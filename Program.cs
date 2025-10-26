@@ -2,6 +2,7 @@ using System.Net;
 using System.Threading.Tasks;
 using NetworkObj.TCP;
 using NetworkObj.Utils;
+using NetworkObj.Bot;
 
 namespace NetworkObj
 {
@@ -74,6 +75,8 @@ namespace NetworkObj
             Thread commandThread = new Thread(CommandLine);
             commandThread.Start();
 
+            Task.Run(async () => await Bot.Bot.Start());
+
             Listener Server = new Listener();
             IPAddress IP = IPAddress.Any;
 
@@ -104,6 +107,39 @@ namespace NetworkObj
         public static void SaveLog()
         {
             File.WriteAllLines(logFile, Logs);
+        }
+
+        public static async Task<bool> BanWrapper(string IP)
+        {
+            if (!BannedIPs.Contains(IP))
+            {
+                BannedIPs.Add(IP);
+                SaveBanList();
+                Logger.Info($"Banned IP: {IP}");
+                Listener.DisconnectClient(IP);
+                return true;
+            }
+
+            return false;
+        }
+
+        public static async Task<bool> UnbanWrapper(string IP)
+        {
+            if (BannedIPs.Contains(IP))
+            {
+                BannedIPs.Remove(IP);
+                SaveBanList();
+                Listener.DisconnectClient(IP);
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool IsBannedWrapper(string IP)
+        {
+            bool contains = BannedIPs.Contains(IP);
+            return contains;
         }
 
         static void CommandLine()
