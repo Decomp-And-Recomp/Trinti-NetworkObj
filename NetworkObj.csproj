@@ -24,4 +24,7 @@
     <Content Include="Packets\Server\GHeartbeat.cs" />
     <Content Include="Program.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Discord.Net" Version="3.18.0" />
+  </ItemGroup>
 </Project>

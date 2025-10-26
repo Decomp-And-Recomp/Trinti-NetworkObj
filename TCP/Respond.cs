@@ -775,6 +775,8 @@ class Responder
 
             await Rooms.SendToRoom(GetRoomId(client), p.Pack(), client);
         }
+
+        await Rooms.DeleteRoom(host.RoomId);
     }
 
     async Task Kick()
